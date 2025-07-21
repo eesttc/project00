@@ -1,0 +1,8 @@
+- Type in table products: 
+  + phone.
+  + tablet.
+  + laptop.
+  + headphone.
+  + camera.
+  + microphone.
+  + others.
