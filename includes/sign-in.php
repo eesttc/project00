@@ -15,12 +15,11 @@ if (!$conn instanceof PDO) {
 // Định nghĩa BASE_URL
 define('BASE_URL', 'http://localhost:8080/project00/');
 
-// if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+// Xử lý form đăng nhập
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Lấy dữ liệu từ form
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
-    echo htmlspecialchars($username); // Debugging line to check username input
-    echo htmlspecialchars($password); // Debugging line to check password input
 
     // Validate dữ liệu
     if (empty($username)) {
@@ -33,22 +32,25 @@ define('BASE_URL', 'http://localhost:8080/project00/');
     // Nếu không có lỗi validate, kiểm tra thông tin đăng nhập
     if (empty($errors)) {
         try {
-            $stmt = $conn->prepare("SELECT id, username, password FROM users WHERE username = ?");
+            $stmt = $conn->prepare("SELECT id, username, password, role FROM users WHERE username = ?");
             $stmt->execute([$username]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
-            var_dump($user['id']); // Debugging line to check user data
-            echo htmlspecialchars($user['id']); // Debugging line to check user ID
 
             if ($user && password_verify($password, $user['password'])) {
                 // Lưu thông tin người dùng vào session
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $user['username'];
+                $_SESSION['role'] = $user['role'];
 
-                // Chuyển hướng đến trang trước đó hoặc mặc định đến index.php
-                $redirect_url = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '../public/index.php';
-                // Tránh chuyển hướng lại về sign-in.php hoặc logout.php
-                if (strpos($redirect_url, 'sign-in.php') !== false || strpos($redirect_url, 'logout.php') !== false) {
-                    $redirect_url = '../public/index.php';
+                // Chuyển hướng dựa trên vai trò
+                if ($user['role'] === 'admin') {
+                    $redirect_url = BASE_URL . 'includes/dashboard.php';
+                } else {
+                    $redirect_url = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : BASE_URL . 'public/index.php';
+                    // Tránh chuyển hướng lại về sign-in.php hoặc logout.php
+                    if (strpos($redirect_url, 'sign-in.php') !== false || strpos($redirect_url, 'logout.php') !== false) {
+                        $redirect_url = BASE_URL . 'public/index.php';
+                    }
                 }
                 header("Location: $redirect_url");
                 exit;
@@ -59,7 +61,7 @@ define('BASE_URL', 'http://localhost:8080/project00/');
             $errors[] = 'Query error: ' . $e->getMessage();
         }
     }
-// }
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
