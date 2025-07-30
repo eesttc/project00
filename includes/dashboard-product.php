@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Sản Phẩm</title>
+    <title>Products manage</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link href="https://cdn.tailwindcss.com" rel="stylesheet">
     <style>
         body {
@@ -82,14 +83,14 @@
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_brand'])) {
             $brand_name = trim($_POST['brand_name']);
             if (empty($brand_name)) {
-                $message = '<p class="error">Vui lòng nhập tên thương hiệu!</p>';
+                $message = '<p class="error">Please fill brand name!</p>';
             } else {
                 try {
                     $stmt_add_brand = $conn->prepare("INSERT INTO brands (name) VALUES (?)");
                     $stmt_add_brand->execute([$brand_name]);
-                    $message = '<p class="success">Thêm thương hiệu thành công!</p>';
+                    $message = '<p class="success">Add brand success!</p>';
                 } catch (PDOException $e) {
-                    $message = '<p class="error">Lỗi: Thương hiệu đã tồn tại hoặc thông tin không hợp lệ! (' . htmlspecialchars($e->getMessage()) . ')</p>';
+                    $message = '<p class="error">Oops: The brand already exists or the information is invalid! (' . htmlspecialchars($e->getMessage()) . ')</p>';
                 }
             }
         }
@@ -104,30 +105,30 @@
 
             // Validate đầu vào
             if (empty($product_name)) {
-                $message = '<p class="error">Tên sản phẩm không được để trống!</p>';
+                $message = '<p class="error">Product name is required!</p>';
             } elseif ($price <= 0) {
-                $message = '<p class="error">Giá phải lớn hơn 0!</p>';
+                $message = '<p class="error">Invalid price!</p>';
             } elseif ($brand_id <= 0) {
-                $message = '<p class="error">Vui lòng chọn thương hiệu hợp lệ!</p>';
+                $message = '<p class="error">Please select a valid brand!</p>';
             } elseif (empty($type)) {
-                $message = '<p class="error">Loại sản phẩm không được để trống!</p>';
+                $message = '<p class="error">Please fill product type!</p>';
             } else {
                 try {
                     // Kiểm tra xem brand_id có tồn tại
                     $stmt_check_brand = $conn->prepare("SELECT COUNT(*) FROM brands WHERE id = ?");
                     $stmt_check_brand->execute([$brand_id]);
                     if ($stmt_check_brand->fetchColumn() == 0) {
-                        $message = '<p class="error">Thương hiệu không tồn tại!</p>';
+                        $message = '<p class="error">Brand does not exists!</p>';
                     } else {
                         $stmt_add_product = $conn->prepare("
                             INSERT INTO products (name, price, brand_id, image_url, type)
                             VALUES (?, ?, ?, ?, ?)
                         ");
                         $stmt_add_product->execute([$product_name, $price, $brand_id, $image_url, $type]);
-                        $message = '<p class="success">Thêm sản phẩm thành công!</p>';
+                        $message = '<p class="success">Add product success!</p>';
                     }
                 } catch (PDOException $e) {
-                    $message = '<p class="error">Lỗi khi thêm sản phẩm: ' . htmlspecialchars($e->getMessage()) . '</p>';
+                    $message = '<p class="error">Oops: ' . htmlspecialchars($e->getMessage()) . '</p>';
                     error_log("Add product error: name=$product_name, price=$price, brand_id=$brand_id, type=$type, error=" . $e->getMessage());
                 }
             }
@@ -141,14 +142,14 @@
                 $stmt_check_order = $conn->prepare("SELECT COUNT(*) FROM orderdetail WHERE productid = ?");
                 $stmt_check_order->execute([$product_id]);
                 if ($stmt_check_order->fetchColumn() > 0) {
-                    $message = '<p class="error">Không thể xóa sản phẩm vì đã có trong đơn hàng!</p>';
+                    $message = '<p class="error">Cannot delete the product because it is already included in an order!</p>';
                 } else {
                     $stmt_delete_product = $conn->prepare("DELETE FROM products WHERE id = ?");
                     $stmt_delete_product->execute([$product_id]);
-                    $message = '<p class="success">Xóa sản phẩm thành công!</p>';
+                    $message = '<p class="success">Deleted product!</p>';
                 }
             } catch (PDOException $e) {
-                $message = '<p class="error">Lỗi khi xóa sản phẩm: ' . htmlspecialchars($e->getMessage()) . '</p>';
+                $message = '<p class="error">Oops: ' . htmlspecialchars($e->getMessage()) . '</p>';
             }
         }
 
@@ -179,14 +180,14 @@
             }
         }
     } catch(PDOException $e) {
-        echo "<div class='container text-red-600'>Lỗi truy vấn: " . htmlspecialchars($e->getMessage()) . "</div>";
+        echo "<div class='container text-red-600'>Oops: " . htmlspecialchars($e->getMessage()) . "</div>";
         exit;
     }
     ?>
 
     <!-- Header -->
-    <header class="bg-blue-600 text-white p-4 shadow-md">
-        <h1 class="text-2xl font-bold">Quản Lý Sản Phẩm</h1>
+    <header class="bg-blue-600 text-black p-4 shadow-md">
+        <h1 class="text-2xl font-bold">Product manage</h1>
     </header>
 
     <!-- Main Content -->
@@ -197,56 +198,56 @@
 
         <!-- Back to Dashboard -->
         <div class="mb-4">
-            <a href="../includes/dashboard.php" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Quay lại Dashboard</a>
+            <a href="../includes/dashboard.php" class="bg-gray-500 text-black px-4 py-2 rounded hover:bg-gray-600">Return dashboard</a>
         </div>
 
         <!-- Add Brand -->
         <div class="card">
-            <h2 class="text-lg font-semibold text-gray-700 mb-4">Thêm Thương Hiệu</h2>
+            <h2 class="text-lg font-semibold text-gray-700 mb-4">Add brand</h2>
             <form method="POST">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <input type="text" name="brand_name" placeholder="Tên thương hiệu" class="border p-2 rounded" required>
+                    <input type="text" name="brand_name" placeholder="Name" class="border p-2 rounded" class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 input-sign-up" required>
                 </div>
-                <button type="submit" name="add_brand" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-4">Thêm Thương Hiệu</button>
+                <button type="submit" name="add_brand" class="btn btn-primary submit-sign-up">Add brand</button>
             </form>
         </div>
 
         <!-- Add Product -->
         <div class="card">
-            <h2 class="text-lg font-semibold text-gray-700 mb-4">Thêm Sản Phẩm</h2>
+            <h2 class="text-lg font-semibold text-gray-700 mb-4">Add product</h2>
             <form method="POST">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <input type="text" name="product_name" placeholder="Tên sản phẩm" class="border p-2 rounded" required>
-                    <input type="number" name="price" placeholder="Giá (VNĐ)" step="0.01" class="border p-2 rounded" required>
+                    <input type="text" name="product_name" placeholder="Name" class="border p-2 rounded" class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 input-sign-up" required>
+                    <input type="number" name="price" placeholder="Price (USD)" step="0.01" class="border p-2 rounded" class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 input-sign-up" required>
                     <select name="brand_id" class="border p-2 rounded" required>
-                        <option value="">Chọn thương hiệu</option>
+                        <option value="">Choose brand</option>
                         <?php foreach ($brands as $brand): ?>
                             <option value="<?php echo htmlspecialchars($brand['id']); ?>"><?php echo htmlspecialchars($brand['name']); ?></option>
                         <?php endforeach; ?>
                     </select>
-                    <input type="text" name="image_url" placeholder="URL hình ảnh (tùy chọn)" class="border p-2 rounded">
-                    <input type="text" name="type" placeholder="Loại sản phẩm (VD: Phone, Laptop)" class="border p-2 rounded" required>
+                    <input type="text" name="image_url" placeholder="URL image (optional)" class="border p-2 rounded" class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 input-sign-up">
+                    <input type="text" name="type" placeholder="Type (VD: Phone, Laptop)" class="border p-2 rounded" class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 input-sign-up" required>
                 </div>
-                <button type="submit" name="add_product" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-4">Thêm Sản Phẩm</button>
+                <button type="submit" name="add_product" class="btn btn-primary submit-sign-up">Add product</button>
             </form>
         </div>
 
         <!-- Search Products -->
         <div class="card">
-            <h2 class="text-lg font-semibold text-gray-700 mb-4">Tìm Kiếm Sản Phẩm</h2>
+            <h2 class="text-lg font-semibold text-gray-700 mb-4">Search product</h2>
             <form method="GET">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <input type="text" name="search" placeholder="Nhập tên hoặc loại sản phẩm" value="<?php echo htmlspecialchars($search_query); ?>" class="border p-2 rounded">
+                    <input type="text" name="search" placeholder="Type infomation..." value="<?php echo htmlspecialchars($search_query); ?>" class="border p-2 rounded" class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 input-sign-up">
                 </div>
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-4">Tìm Kiếm</button>
+                <button type="submit" class="btn btn-primary submit-sign-up">Search</button>
             </form>
         </div>
 
         <!-- Products by Brand -->
         <div class="card">
-            <h2 class="text-lg font-semibold text-gray-700 mb-4">Danh Sách Sản Phẩm</h2>
+            <h2 class="text-lg font-semibold text-gray-700 mb-4">List</h2>
             <?php if (empty($products_by_brand)): ?>
-                <p>Không tìm thấy sản phẩm nào.</p>
+                <p>No product.</p>
             <?php else: ?>
                 <?php foreach ($products_by_brand as $brand_name => $products): ?>
                     <div class="brand-section">
@@ -255,11 +256,11 @@
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Tên Sản Phẩm</th>
-                                        <th>Giá (VNĐ)</th>
-                                        <th>Loại</th>
-                                        <th>Hành Động</th>
+                                        <th>Product id</th>
+                                        <th>Product name</th>
+                                        <th>Price (USD)</th>
+                                        <th>Type</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -270,10 +271,10 @@
                                             <td><?php echo number_format($product['price'], 2); ?></td>
                                             <td><?php echo htmlspecialchars($product['type']); ?></td>
                                             <td>
-                                                <form method="POST" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?');">
+                                                <form method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this product?');">
                                                     <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
                                                     <input type="hidden" name="delete_product" value="1">
-                                                    <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Xóa</button>
+                                                    <button type="submit" class="btn btn-primary submit-sign-up">Delete</button>
                                                 </form>
                                             </td>
                                         </tr>

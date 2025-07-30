@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Quản Lý</title>
+    <title>Dashboard</title>
     <link href="https://cdn.tailwindcss.com" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -100,9 +101,9 @@
             if ($total_price !== null) {
                 $stmt_bill = $conn->prepare("INSERT INTO bill (orderid, totalprice) VALUES (?, ?)");
                 $stmt_bill->execute([$order_id, $total_price]);
-                $message = '<p class="success">Tạo hóa đơn thành công!</p>';
+                $message = '<p class="success">Create bill success!</p>';
             } else {
-                $message = '<p class="error">Không thể tính tổng giá cho đơn hàng!</p>';
+                $message = '<p class="error">Cannot create bill!</p>';
             }
         }
 
@@ -111,7 +112,7 @@
             $order_id = (int)$_POST['order_id'];
             $stmt_update = $conn->prepare("UPDATE `order` SET status = 'done' WHERE id = ?");
             $stmt_update->execute([$order_id]);
-            $message = '<p class="success">Cập nhật trạng thái đơn hàng thành công!</p>';
+            $message = '<p class="success">Updated!</p>';
         }
 
         // Xử lý hủy đơn hàng
@@ -119,7 +120,7 @@
             $order_id = (int)$_POST['order_id'];
             $stmt_update = $conn->prepare("UPDATE `order` SET status = 'canceled' WHERE id = ?");
             $stmt_update->execute([$order_id]);
-            $message = '<p class="success">Hủy đơn hàng thành công!</p>';
+            $message = '<p class="success">Canceled order!</p>';
         }
 
         // Xử lý xóa tài khoản người dùng
@@ -127,7 +128,7 @@
             $user_id = (int)$_POST['user_id'];
             $stmt_delete = $conn->prepare("DELETE FROM users WHERE id = ?");
             $stmt_delete->execute([$user_id]);
-            $message = '<p class="success">Xóa tài khoản thành công!</p>';
+            $message = '<p class="success">Removed user!</p>';
         }
 
         // Xử lý thêm tài khoản người dùng
@@ -141,7 +142,7 @@
             $email = empty($email) ? null : $email;
 
             if (empty($username) || empty($password) || empty($phone)) {
-                $message = '<p class="error">Vui lòng điền đầy đủ thông tin bắt buộc!</p>';
+                $message = '<p class="error">Please fill required information!</p>';
             } else {
                 $stmt_check_username = $conn->prepare("SELECT COUNT(*) FROM users WHERE username = ?");
                 $stmt_check_username->execute([$username]);
@@ -159,11 +160,11 @@
                 }
 
                 if ($username_exists) {
-                    $message = '<p class="error">Tên đăng nhập đã tồn tại!</p>';
+                    $message = '<p class="error">Username exists!</p>';
                 } elseif ($phone_exists) {
-                    $message = '<p class="error">Số điện thoại đã tồn tại!</p>';
+                    $message = '<p class="error">Phone number exists!</p>';
                 } elseif ($email_exists) {
-                    $message = '<p class="error">Email đã tồn tại!</p>';
+                    $message = '<p class="error">Email exists!</p>';
                 } else {
                     try {
                         $stmt_add_user = $conn->prepare("
@@ -171,9 +172,9 @@
                             VALUES (?, ?, ?, ?, 1, ?)
                         ");
                         $stmt_add_user->execute([$username, $password, $email, $phone, $role]);
-                        $message = '<p class="success">Thêm tài khoản thành công!</p>';
+                        $message = '<p class="success">Create account success!</p>';
                     } catch (PDOException $e) {
-                        $message = '<p class="error">Lỗi khi thêm tài khoản: ' . htmlspecialchars($e->getMessage()) . '</p>';
+                        $message = '<p class="error">Cannot create account: ' . htmlspecialchars($e->getMessage()) . '</p>';
                     }
                 }
             }
@@ -190,7 +191,7 @@
         $stmt_check_orders = $conn->query("SELECT id, userid, dateoforder, status FROM `order`");
         $debug_orders = $stmt_check_orders->fetchAll(PDO::FETCH_ASSOC);
         if (empty($debug_orders)) {
-            $message = '<p class="error">Không tìm thấy đơn hàng trong database!</p>';
+            $message = '<p class="error">Cannot find the order!</p>';
         }
 
         // Lấy danh sách đơn hàng gần đây (chưa hoàn thành)
@@ -233,14 +234,14 @@
             $order_details = $stmt_details->fetchAll(PDO::FETCH_ASSOC);
         }
     } catch(PDOException $e) {
-        echo "<div class='container text-red-600'>Lỗi truy vấn: " . htmlspecialchars($e->getMessage()) . "</div>";
+        echo "<div class='container text-red-600'>Oops!: " . htmlspecialchars($e->getMessage()) . "</div>";
         exit;
     }
     ?>
 
     <!-- Header -->
-    <header class="bg-blue-600 text-white p-4 shadow-md">
-        <h1 class="text-2xl font-bold">Dashboard Quản Lý</h1>
+    <header class="bg-blue-600 text-black p-4 shadow-md">
+        <h1 class="text-2xl font-bold">Dashboard</h1>
     </header>
 
     <!-- Main Content -->
@@ -252,65 +253,65 @@
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
             <div class="card">
-                <h2 class="text-lg font-semibold text-gray-700">Sản Phẩm</h2>
+                <h2 class="text-lg font-semibold text-gray-700">Products</h2>
                 <p class="text-3xl font-bold text-blue-600"><?php echo $products_count; ?></p>
             </div>
             <div class="card">
-                <h2 class="text-lg font-semibold text-gray-700">Đơn Hàng</h2>
+                <h2 class="text-lg font-semibold text-gray-700">Orders</h2>
                 <p class="text-3xl font-bold text-blue-600"><?php echo $orders_count; ?></p>
             </div>
         </div>
 
         <!-- Product Management Link -->
         <div class="card">
-            <h2 class="text-lg font-semibold text-gray-700 mb-4">Quản Lý Sản Phẩm</h2>
+            <h2 class="text-lg font-semibold text-gray-700 mb-4">Product manage</h2>
             <a href="../includes/dashboard-product.php" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Đi đến Quản Lý Sản Phẩm</a>
         </div>
 
         <!-- Recent Orders Table -->
         <div class="card">
-            <h2 class="text-lg font-semibold text-gray-700 mb-4">Đơn Hàng Gần Đây (Chưa Hoàn Thành)</h2>
+            <h2 class="text-lg font-semibold text-gray-700 mb-4">Recent Orders (Not Completed)</h2>
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
-                            <th>Mã Đơn Hàng</th>
-                            <th>ID Người Dùng</th>
-                            <th>Ngày Đặt</th>
-                            <th>Tổng Tiền</th>
-                            <th>Trạng Thái</th>
-                            <th>Hành Động</th>
+                            <th>Order id</th>
+                            <th>User id</th>
+                            <th>Order date</th>
+                            <th>Total amount</th>
+                            <th>Status</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($recent_orders)): ?>
-                            <tr><td colspan="6">Không có đơn hàng chưa hoàn thành.</td></tr>
+                            <tr><td colspan="6">No incomplete orders.</td></tr>
                         <?php else: ?>
                             <?php foreach ($recent_orders as $order): ?>
                                 <tr>
                                     <td><?php echo htmlspecialchars($order['id']); ?></td>
                                     <td><?php echo htmlspecialchars($order['userid']); ?></td>
                                     <td><?php echo htmlspecialchars($order['dateoforder']); ?></td>
-                                    <td><?php echo $order['totalprice'] ? number_format($order['totalprice'], 2) : 'Chưa có hóa đơn'; ?> VNĐ</td>
+                                    <td><?php echo $order['totalprice'] ? number_format($order['totalprice'], 2) : 'Chưa có hóa đơn'; ?> USD</td>
                                     <td><?php echo htmlspecialchars($order['status']); ?></td>
                                     <td>
                                         <?php if (!$order['totalprice']): ?>
                                             <form method="POST" style="display:inline;">
                                                 <input type="hidden" name="order_id" value="<?php echo $order['id']; ?>">
                                                 <input type="hidden" name="show_details" value="1">
-                                                <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">Tạo hóa đơn</button>
+                                                <button type="submit" class="btn btn-primary submit-sign-up">Create bill</button>
                                             </form>
                                         <?php endif; ?>
                                         <?php if ($order['status'] === 'pending'): ?>
                                             <form method="POST" style="display:inline;">
                                                 <input type="hidden" name="order_id" value="<?php echo $order['id']; ?>">
                                                 <input type="hidden" name="complete_order" value="1">
-                                                <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Hoàn thành</button>
+                                                <button type="submit" class="btn btn-primary submit-sign-up">Complete</button>
                                             </form>
                                             <form method="POST" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này?');">
                                                 <input type="hidden" name="order_id" value="<?php echo $order['id']; ?>">
                                                 <input type="hidden" name="cancel_order" value="1">
-                                                <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Hủy</button>
+                                                <button type="submit" class="btn btn-primary submit-sign-up">Cancel</button>
                                             </form>
                                         <?php endif; ?>
                                     </td>
@@ -326,14 +327,14 @@
         <?php if (!empty($order_details)): ?>
             <div class="modal" style="display: flex;">
                 <div class="modal-content">
-                    <h2 class="text-lg font-semibold mb-4">Chi Tiết Hóa Đơn</h2>
+                    <h2 class="text-lg font-semibold mb-4">Bill Detail</h2>
                     <table class="w-full">
                         <thead>
                             <tr>
-                                <th>Sản Phẩm</th>
-                                <th>Số Lượng</th>
-                                <th>Giá</th>
-                                <th>Tổng</th>
+                                <th>Products</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Total</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -353,16 +354,16 @@
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="3" class="text-right font-bold">Tổng cộng:</td>
-                                <td><?php echo number_format($total, 2); ?> VNĐ</td>
+                                <td colspan="3" class="text-right font-bold">Final amount:</td>
+                                <td><?php echo number_format($total, 2); ?> USD</td>
                             </tr>
                         </tfoot>
                     </table>
                     <form method="POST">
                         <input type="hidden" name="order_id" value="<?php echo $_POST['order_id']; ?>">
                         <input type="hidden" name="create_bill" value="1">
-                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-4">Xác nhận tạo hóa đơn</button>
-                        <a href="dashboard.php" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mt-4 ml-2">Đóng</a>
+                        <button type="submit" class="btn btn-primary submit-sign-up">Create</button>
+                        <a href="dashboard.php" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mt-4 ml-2">Close</a>
                     </form>
                 </div>
             </div>
@@ -370,48 +371,48 @@
 
         <!-- All Orders Table -->
         <div class="card">
-            <h2 class="text-lg font-semibold text-gray-700 mb-4">Tất Cả Đơn Hàng</h2>
+            <h2 class="text-lg font-semibold text-gray-700 mb-4">All orders</h2>
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
-                            <th>Mã Đơn Hàng</th>
-                            <th>ID Người Dùng</th>
-                            <th>Ngày Đặt</th>
-                            <th>Tổng Tiền</th>
-                            <th>Trạng Thái</th>
-                            <th>Hành Động</th>
+                            <th>Order id</th>
+                            <th>User id</th>
+                            <th>Order date</th>
+                            <th>Final amount</th>
+                            <th>Status</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($all_orders)): ?>
-                            <tr><td colspan="6">Không có đơn hàng nào.</td></tr>
+                            <tr><td colspan="6">No orders.</td></tr>
                         <?php else: ?>
                             <?php foreach ($all_orders as $order): ?>
                                 <tr>
                                     <td><?php echo htmlspecialchars($order['id']); ?></td>
                                     <td><?php echo htmlspecialchars($order['userid']); ?></td>
                                     <td><?php echo htmlspecialchars($order['dateoforder']); ?></td>
-                                    <td><?php echo $order['totalprice'] ? number_format($order['totalprice'], 2) : 'Chưa có hóa đơn'; ?> VNĐ</td>
+                                    <td><?php echo $order['totalprice'] ? number_format($order['totalprice'], 2) : 'Invoice not ready'; ?> USD</td>
                                     <td><?php echo htmlspecialchars($order['status']); ?></td>
                                     <td>
                                         <?php if (!$order['totalprice']): ?>
                                             <form method="POST" style="display:inline;">
                                                 <input type="hidden" name="order_id" value="<?php echo $order['id']; ?>">
                                                 <input type="hidden" name="show_details" value="1">
-                                                <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">Tạo hóa đơn</button>
+                                                <button type="submit" class="btn btn-primary submit-sign-up">Create bill</button>
                                             </form>
                                         <?php endif; ?>
                                         <?php if ($order['status'] === 'pending'): ?>
                                             <form method="POST" style="display:inline;">
                                                 <input type="hidden" name="order_id" value="<?php echo $order['id']; ?>">
                                                 <input type="hidden" name="complete_order" value="1">
-                                                <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Hoàn thành</button>
+                                                <button type="submit" class="btn btn-primary submit-sign-up">Complete</button>
                                             </form>
-                                            <form method="POST" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này?');">
+                                            <form method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to cancel this order?');">
                                                 <input type="hidden" name="order_id" value="<?php echo $order['id']; ?>">
                                                 <input type="hidden" name="cancel_order" value="1">
-                                                <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Hủy</button>
+                                                <button type="submit" class="btn btn-primary submit-sign-up">Cancel</button>
                                             </form>
                                         <?php endif; ?>
                                     </td>
@@ -425,21 +426,21 @@
 
         <!-- Users Table -->
         <div class="card">
-            <h2 class="text-lg font-semibold text-gray-700 mb-4">Người Dùng</h2>
+            <h2 class="text-lg font-semibold text-gray-700 mb-4">Users</h2>
             <div class="mb-4">
-                <h3 class="text-md font-semibold mb-2">Thêm Người Dùng</h3>
+                <h3 class="text-md font-semibold mb-2">Add user</h3>
                 <form method="POST">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <input type="text" name="username" placeholder="Tên đăng nhập" class="border p-2 rounded" required>
-                        <input type="password" name="password" placeholder="Mật khẩu" class="border p-2 rounded" required>
-                        <input type="email" name="email" placeholder="Email (tùy chọn)" class="border p-2 rounded">
-                        <input type="text" name="phone" placeholder="Số điện thoại" class="border p-2 rounded" required>
+                        <input type="text" name="username" placeholder="Username" class="border p-2 rounded" required>
+                        <input type="password" name="password" placeholder="Password" class="border p-2 rounded" required>
+                        <input type="email" name="email" placeholder="Email (optional)" class="border p-2 rounded">
+                        <input type="text" name="phone" placeholder="Phone number" class="border p-2 rounded" required>
                         <select name="role" class="border p-2 rounded" required>
                             <option value="user">User</option>
                             <option value="admin">Admin</option>
                         </select>
                     </div>
-                    <button type="submit" name="add_user" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-4">Thêm</button>
+                    <button type="submit" name="add_user" class="btn btn-primary submit-sign-up">Add</button>
                 </form>
             </div>
             <div class="table-container">
@@ -447,11 +448,11 @@
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Tên Đăng Nhập</th>
+                            <th>Username</th>
                             <th>Email</th>
-                            <th>Số Điện Thoại</th>
-                            <th>Vai Trò</th>
-                            <th>Hành Động</th>
+                            <th>Phone number</th>
+                            <th>Role</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -463,10 +464,10 @@
                                 <td><?php echo htmlspecialchars($user['phone']); ?></td>
                                 <td><?php echo htmlspecialchars($user['role']); ?></td>
                                 <td>
-                                    <form method="POST" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa tài khoản này?');">
-                                        <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
-                                        <input type="hidden" name="delete_user" value="1">
-                                        <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Xóa</button>
+                                    <form method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this account?');">
+                                        <input class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 input-sign-up" type="hidden" name="user_id" value="<?php echo $user['id']; ?> ">
+                                        <input type="hidden" name="delete_user" value="1" class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 input-sign-up">
+                                        <button type="submit" class="btn btn-primary submit-sign-up">Remove</button>
                                     </form>
                                 </td>
                             </tr>
